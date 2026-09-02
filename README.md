@@ -1,4 +1,4 @@
-# omnibook-audio-fix
+# HP OmniBook X Flip 14 (board 8EA1) — Linux audio fix
 
 **Internal audio (speakers + mic) on the HP OmniBook X Flip 14 (DMI board `8EA1`) under Linux.**
 
@@ -15,6 +15,25 @@ instead of pasting commands blindly. See [`docs/DIAGNOSIS.md`](docs/DIAGNOSIS.md
 > **TL;DR**
 > - On **Linux ≥ 7.3** (kernel already supports the board): run `sudo ./install.sh`, reboot. Done.
 > - On an **older kernel** (only HDMI audio shows up): you need a newer kernel first — see [`docs/kernel-build-interim.md`](docs/kernel-build-interim.md) — then run `install.sh`.
+
+## Symptoms / error messages
+
+If you're here from a search, these are the symptoms this repo fixes on the
+OmniBook X Flip 14 (board `8EA1`):
+
+- **No sound from the internal speakers**, and the **headphone jack is dead**.
+- `aplay -l` lists **HDMI outputs only** — no speaker/SoundWire playback device.
+- The **internal microphone records garbage / digital silence** (a railed
+  bitstream pinned at full-scale), so Whisper/voice tools transcribe nothing.
+- `dmesg` shows the speaker firmware failing to load:
+
+  ```
+  Direct firmware load for 8EA1-0-0xC.bin failed with error -2
+  ... error playback without fw download
+  ```
+
+That combination is the AMD SoundWire / TAS2783 + RT712 support gap addressed
+below.
 
 ## Is this your machine?
 
