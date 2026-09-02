@@ -16,6 +16,47 @@ instead of pasting commands blindly. See [`docs/DIAGNOSIS.md`](docs/DIAGNOSIS.md
 > - On **Linux ≥ 7.3** (kernel already supports the board): run `sudo ./install.sh`, reboot. Done.
 > - On an **older kernel** (only HDMI audio shows up): you need a newer kernel first — see [`docs/kernel-build-interim.md`](docs/kernel-build-interim.md) — then run `install.sh`.
 
+## Is this your machine?
+
+This is written for the **HP OmniBook X Flip 14** whose DMI **board is `8EA1`**
+(the 16-inch sibling is `8EA2`). Confirm with one command:
+
+```bash
+cat /sys/class/dmi/id/board_name     # must print: 8EA1
+```
+
+Exact hardware this was developed against:
+
+| | |
+|---|---|
+| Model | HP OmniBook X Flip Laptop **14-kc0xxx** |
+| Product family | `103C_5335M8 HP OmniBook X` |
+| **DMI board** | **`8EA1`** (16" sibling = `8EA2`) |
+| SoC | AMD **Ryzen AI 5 430** w/ Radeon 840M (Strix Point) |
+| Audio co-processor | AMD **ACP 7.0** — PCI `1022:15e2` (rev 72) |
+| Speaker amps | 2× TI **TAS2783** on SoundWire **link 0**, UIDs **`0x9`** and **`0xC`** (`sdw:0:0:0102:0000:01:9` / `…:c`) |
+| Mic + headphone jack | Realtek **RT712** (SDCA) on SoundWire **link 1** (`sdw:0:1:025d:0712:01`) |
+| BIOS (tested) | `F.06` (2026-04-17) |
+| Tested kernel | mainline **7.3-rc1** |
+| Tested firmware | `linux-firmware` 20260810 |
+
+**Broken fingerprint (before any fix):** `aplay -l` shows **HDMI only**; the
+internal mic (a legacy ACP PDM card, e.g. `acp-pdm-mach`) records a **railed**
+bitstream (samples pinned at ±full-scale).
+
+**Working fingerprint (after fix, kernel ≥ 7.3-rc1):** a `amd-soundwire` card
+appears with —
+
+```
+card 1: amdsoundwire [amd-soundwire], device 2: SDW0-PIN1-PLAYBACK-SmartAmp   (speakers)
+card 1: amdsoundwire [amd-soundwire], device 4: SDW1-PIN5-CAPTURE-SmartMic    (internal mic)
+card 1: amdsoundwire [amd-soundwire], device 0: SDW1-PIN0-PLAYBACK-SimpleJack (headphone jack)
+```
+
+Other `14-kc0xxx` / `8EA1` units should match; different board strings (e.g.
+`8EA2`) may need different firmware names — file an issue with your
+`board_name`, `uname -r`, `linux-firmware` version, and `aplay -l`/`arecord -l`.
+
 ## What actually needs fixing
 
 Three separate layers, three separate fixes:
@@ -40,8 +81,8 @@ custom kernel** — only the two userspace fixes in `install.sh`.
 ## Install
 
 ```bash
-git clone https://github.com/<owner>/omnibook-audio-fix
-cd omnibook-audio-fix
+git clone https://github.com/sansscott/omnibook-x-flip-14-8ea1-linux-audio
+cd omnibook-x-flip-14-8ea1-linux-audio
 sudo ./install.sh
 sudo reboot        # firmware is only requested at boot-time probe
 ```
