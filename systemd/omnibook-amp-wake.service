@@ -1,0 +1,26 @@
+# EXPERIMENTAL user unit — right-amp cold-boot wake (see experimental/).
+#
+# Install (per user):
+#   mkdir -p ~/.config/systemd/user
+#   install -m0755 experimental/omnibook-amp-wake.sh ~/.local/bin/omnibook-amp-wake
+#   cp systemd/omnibook-amp-wake.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now omnibook-amp-wake.service
+#
+# Runs once after the audio stack is up. Only enable this if the right speaker
+# is silent for you after a cold boot AND this helper actually fixes it —
+# it is UNVERIFIED. Plays no audio.
+
+[Unit]
+Description=OmniBook X Flip right-amp wake (experimental)
+After=wireplumber.service pipewire.service
+Wants=wireplumber.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sleep 3
+ExecStart=%h/.local/bin/omnibook-amp-wake
+RemainAfterExit=no
+
+[Install]
+WantedBy=default.target

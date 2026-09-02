@@ -1,0 +1,4 @@
+*.wav
+/tmp/
+__pycache__/
+*.pyc
